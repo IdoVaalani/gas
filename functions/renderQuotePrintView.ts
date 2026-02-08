@@ -352,6 +352,13 @@ Deno.serve(async (req) => {
       <p>הצעה זו נוצרה במערכת ממוחשבת ואינה דורשת חתימה</p>
     </div>
   </div>
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
 </body>
 </html>
     `;
