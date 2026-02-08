@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -10,9 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, FileText, Search, Printer, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, Search, Printer, Eye, Download } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 export default function QuotesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -310,6 +311,174 @@ export default function QuotesPage() {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(response.data);
     printWindow.document.close();
+  };
+
+  const generateQuotePDF = async (quoteId) => {
+    const quote = quotes.find(q => q.id === quoteId);
+    if (!quote) return;
+
+    const customer = customers.find(c => c.id === quote.לקוח_id);
+    const lines = quoteLines.filter(l => l.הצעת_מחיר_id === quoteId);
+
+    let subtotal = 0;
+    lines.forEach(line => {
+      const lineTotal = (line.כמות || 0) * (line.מחיר_יחידה || 0) * (1 - ((line.הנחה_אחוז || 0) / 100));
+      subtotal += lineTotal;
+    });
+    
+    const calculatedVat = subtotal * 0.18;
+    const calculatedTotal = subtotal + calculatedVat;
+
+    // Create temporary container
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.right = '-9999px';
+    container.style.width = '210mm';
+    container.style.background = 'white';
+    container.style.direction = 'rtl';
+    document.body.appendChild(container);
+
+    container.innerHTML = `
+      <div style="font-family: Arial, sans-serif; padding: 40px; background: white; color: #333; direction: rtl;">
+        <div style="max-width: 900px; margin: 0 auto; background: white;">
+          <div style="border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="text-align: right;">
+              <div style="font-size: 32px; font-weight: bold; color: #2563eb; margin-bottom: 5px;">Amisra Shaltiel</div>
+              <div style="font-size: 14px; color: #666; line-height: 1.6;">
+                מערכת ניהול התקנות גז<br>
+                טלפון: 050-1234567<br>
+                info@amisrashaltiel.co.il
+              </div>
+            </div>
+            <div style="font-size: 24px; font-weight: bold; color: #1e40af;">הצעת מחיר</div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <h3 style="font-size: 16px; color: #1e40af; margin-bottom: 10px; border-bottom: 2px solid #2563eb; padding-bottom: 5px;">פרטי לקוח</h3>
+              <p style="margin: 8px 0; font-size: 14px;"><span style="font-weight: bold; color: #64748b;">שם:</span> ${customer?.שם_לקוח || ''}</p>
+              <p style="margin: 8px 0; font-size: 14px;"><span style="font-weight: bold; color: #64748b;">טלפון:</span> ${customer?.טלפון || ''}</p>
+              ${customer?.אימייל ? `<p style="margin: 8px 0; font-size: 14px;"><span style="font-weight: bold; color: #64748b;">אימייל:</span> ${customer.אימייל}</p>` : ''}
+              ${customer?.איש_קשר ? `<p style="margin: 8px 0; font-size: 14px;"><span style="font-weight: bold; color: #64748b;">איש קשר:</span> ${customer.איש_קשר}</p>` : ''}
+              ${customer?.כתובת ? `<p style="margin: 8px 0; font-size: 14px;"><span style="font-weight: bold; color: #64748b;">כתובת:</span> ${customer.כתובת}</p>` : ''}
+            </div>
+            
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <h3 style="font-size: 16px; color: #1e40af; margin-bottom: 10px; border-bottom: 2px solid #2563eb; padding-bottom: 5px;">פרטי הצעה</h3>
+              <p style="margin: 8px 0; font-size: 14px;"><span style="font-weight: bold; color: #64748b;">מספר הצעה:</span> ${quote.מספר_הצעה}</p>
+              <p style="margin: 8px 0; font-size: 14px;"><span style="font-weight: bold; color: #64748b;">תאריך:</span> ${format(new Date(quote.תאריך_הצעה), 'dd/MM/yyyy')}</p>
+              ${quote.תוקף_עד ? `<p style="margin: 8px 0; font-size: 14px;"><span style="font-weight: bold; color: #64748b;">תוקף עד:</span> ${format(new Date(quote.תוקף_עד), 'dd/MM/yyyy')}</p>` : ''}
+              <p style="margin: 8px 0; font-size: 14px;"><span style="font-weight: bold; color: #64748b;">סטטוס:</span> ${quote.סטטוס}</p>
+            </div>
+          </div>
+          
+          <table style="width: 100%; border-collapse: collapse; margin: 30px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <thead style="background: #2563eb; color: white;">
+              <tr>
+                <th style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px;">תיאור</th>
+                <th style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px; width: 80px;">כמות</th>
+                <th style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px; width: 100px;">מחיר יחידה</th>
+                <th style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px; width: 80px;">הנחה %</th>
+                <th style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px; width: 120px;">סה"כ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${lines.map(line => {
+                const lineTotal = (line.כמות || 0) * (line.מחיר_יחידה || 0) * (1 - ((line.הנחה_אחוז || 0) / 100));
+                return `
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                  <td style="padding: 12px 15px; text-align: right;">${line.תיאור}</td>
+                  <td style="padding: 12px 15px; text-align: right;">${line.כמות}</td>
+                  <td style="padding: 12px 15px; text-align: right;">₪${line.מחיר_יחידה?.toFixed(2)}</td>
+                  <td style="padding: 12px 15px; text-align: right;">${line.הנחה_אחוז || 0}%</td>
+                  <td style="padding: 12px 15px; text-align: right;"><strong>₪${lineTotal.toFixed(2)}</strong></td>
+                </tr>
+              `;
+              }).join('')}
+            </tbody>
+          </table>
+          
+          <div style="margin-top: 30px; text-align: left; max-width: 400px; margin-right: auto;">
+            <div style="display: flex; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid #e2e8f0; font-size: 15px; background: #f8fafc;">
+              <span>סכום לפני מע"מ:</span>
+              <span><strong>₪${subtotal.toFixed(2)}</strong></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid #e2e8f0; font-size: 15px; background: #f1f5f9;">
+              <span>מע"מ (18%):</span>
+              <span><strong>₪${calculatedVat.toFixed(2)}</strong></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 10px 20px; background: #2563eb; color: white; font-weight: bold; font-size: 18px; margin-top: 5px;">
+              <span>סה"כ לתשלום:</span>
+              <span>₪${calculatedTotal.toFixed(2)}</span>
+            </div>
+          </div>
+          
+          ${quote.הערות ? `
+            <div style="margin-top: 40px; padding: 20px; background: #fffbeb; border-right: 4px solid #f59e0b; border-radius: 4px;">
+              <h3 style="color: #92400e; margin-bottom: 10px; font-size: 16px;">הערות</h3>
+              <p style="color: #78350f; line-height: 1.6; font-size: 14px;">${quote.הערות}</p>
+            </div>
+          ` : ''}
+          
+          <div style="margin-top: 40px; padding: 20px; background: #fffbeb; border-right: 4px solid #f59e0b; border-radius: 4px;">
+            <h3 style="color: #92400e; margin-bottom: 10px; font-size: 16px;">תנאי תשלום</h3>
+            <p style="color: #78350f; line-height: 1.6; font-size: 14px;">
+              • תוקף ההצעה: 30 יום מתאריך הצעה זו<br>
+              • תשלום: 50% מקדמה, יתרה בסיום העבודה<br>
+              • המחירים כוללים מע"מ<br>
+              • זמן אספקה: 7-14 ימי עסקים
+            </p>
+          </div>
+          
+          <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 12px;">
+            <p>Amisra Shaltiel - מערכת ניהול התקנות גז | www.amisrashaltiel.co.il | 050-1234567</p>
+            <p>הצעה זו נוצרה במערכת ממוחשבת ואינה דורשת חתימה</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    try {
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        windowWidth: container.scrollWidth + 100,
+        windowHeight: container.scrollHeight + 100,
+        x: -20,
+        y: -20
+      });
+
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth() - 20;
+      const pdfHeight = pdf.internal.pageSize.getHeight() - 20;
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = 10;
+
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + 10;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      pdf.save(`הצעת-מחיר-${quote.מספר_הצעה}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('שגיאה ביצירת PDF');
+      if (container.parentNode) {
+        document.body.removeChild(container);
+      }
+    }
   };
 
   const getCustomerName = (id) => customers.find(c => c.id === id)?.שם_לקוח || '-';
@@ -757,10 +926,10 @@ export default function QuotesPage() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          onClick={() => handlePrint(quote.id)} 
-                          title="תצוגת הדפסה"
+                          onClick={() => generateQuotePDF(quote.id)} 
+                          title="הורד הצעת מחיר PDF"
                         >
-                          <Printer className="w-4 h-4" />
+                          <Download className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
