@@ -189,14 +189,14 @@ export async function generateInvoicePDF({ invoice, customers, technicians, invo
           <div><strong>תאריך:</strong> ${invoiceDate}</div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; margin: 10px 0; border: 2px solid #000;">
+        <table style="width: 100%; border-collapse: collapse; margin: 10px 0; border: 2px solid #000; border-bottom: 2px solid #000;">
           <thead>
             <tr>
-              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">מק"ט</th>
-              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">תיאור פריט</th>
-              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">כמות</th>
-              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">מחיר</th>
-              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">סה"כ</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold; width: 12%;">מק"ט</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold; width: 46%;">תיאור פריט</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold; width: 10%;">כמות</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold; width: 16%;">מחיר</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold; width: 16%;">סה"כ</th>
             </tr>
           </thead>
           <tbody>
