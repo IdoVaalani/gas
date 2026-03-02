@@ -423,15 +423,10 @@ export default function ItemsPage() {
   };
 
   const filteredItems = items.filter(item => {
-    const matchesSearch = item.שם_פריט?.includes(searchTerm) ||
+    if (item.סוג_פריט !== "פריט") return false;
+    return item.שם_פריט?.includes(searchTerm) ||
       item.מספר_קטלוג?.includes(searchTerm) ||
       item.תיאור?.includes(searchTerm);
-
-    if (activeTab === "all") return matchesSearch;
-    if (activeTab === "items") return matchesSearch && item.סוג_פריט === "פריט";
-    if (activeTab === "work") return matchesSearch && item.סוג_פריט === "עבודה";
-
-    return matchesSearch;
   });
 
   const itemsCount = items.filter(i => i.סוג_פריט === "פריט").length;
