@@ -546,7 +546,7 @@ export default function InvoicesPage() {
   };
 
   const generateInvoiceNumber = async (invoiceId) => {
-    let nextInvoiceNumber = 7527;
+    let nextInvoiceNumber = 7619;
     if (invoices.length > 0) {
       const existingNumbers = invoices
         .map(inv => parseInt(inv.מספר_חשבונית))
