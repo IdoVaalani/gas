@@ -57,6 +57,14 @@ export default function PDFDownloadDialog({ open, onOpenChange, invoice, onConfi
             />
             <p className="text-xs text-gray-500 mt-1">התאריך שיוצג בחשבונית המודפסת</p>
           </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="isCopy"
+              checked={isCopy}
+              onCheckedChange={setIsCopy}
+            />
+            <Label htmlFor="isCopy" className="cursor-pointer">סמן כ"העתק"</Label>
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               ביטול
