@@ -1449,6 +1449,13 @@ export default function InvoicesPage() {
           </DialogContent>
         </Dialog>
 
+        <PDFDownloadDialog
+          open={showPDFDialog}
+          onOpenChange={setShowPDFDialog}
+          invoice={pdfTargetInvoice}
+          onConfirm={handlePDFDialogConfirm}
+        />
+
         <InvoiceLineItemsDialog
           open={showLineItems}
           onOpenChange={setShowLineItems}
