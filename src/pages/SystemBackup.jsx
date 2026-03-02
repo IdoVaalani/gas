@@ -32,6 +32,7 @@ export default function SystemBackup() {
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [backupResult, setBackupResult] = useState(null);
   const [restoreResult, setRestoreResult] = useState(null);
+  const [restoreProgress, setRestoreProgress] = useState(null); // { stage, step, total }
 
   const handleBackup = async () => {
     setIsBackingUp(true);
