@@ -317,6 +317,24 @@ export default function SystemBackup() {
                   שחזר מערכת
                 </Button>
 
+                {isRestoring && restoreProgress && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm text-gray-700 font-medium">
+                      <span>{restoreProgress.stage}</span>
+                      <span>{restoreProgress.percent}%</span>
+                    </div>
+                    {restoreProgress.entityLabel && (
+                      <div className="text-xs text-gray-500">{restoreProgress.entityLabel}</div>
+                    )}
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-orange-500 h-3 rounded-full transition-all duration-300"
+                        style={{ width: `${restoreProgress.percent}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {restoreResult && (
                   <Alert className={restoreResult.success ? "bg-green-50 border-green-300" : "bg-red-50 border-red-300"}>
                     {restoreResult.success ? (
