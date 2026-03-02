@@ -79,6 +79,19 @@ export default function SystemBackup() {
     }
   };
 
+  const restoreOrder = [
+    'פריט', 'טכנאי', 'לקוח', 'אתר', 'הזמנת_עבודה',
+    'הצעת_מחיר', 'שורת_הצעה', 'חשבונית', 'שורת_חשבונית',
+    'תשלום_חשבונית', 'מסמך_חשבונית'
+  ];
+
+  const entityLabels = {
+    'פריט': 'פריטים', 'טכנאי': 'טכנאים', 'לקוח': 'לקוחות',
+    'אתר': 'אתרים', 'הזמנת_עבודה': 'הזמנות עבודה', 'הצעת_מחיר': 'הצעות מחיר',
+    'שורת_הצעה': 'שורות הצעה', 'חשבונית': 'חשבוניות', 'שורת_חשבונית': 'שורות חשבונית',
+    'תשלום_חשבונית': 'תשלומים', 'מסמך_חשבונית': 'מסמכים'
+  };
+
   const handleRestore = async () => {
     if (!backupFile) {
       alert('נא לבחור קובץ גיבוי');
@@ -87,25 +100,65 @@ export default function SystemBackup() {
 
     setIsRestoring(true);
     setRestoreResult(null);
+    setRestoreProgress(null);
     
     try {
-      // קריאת הקובץ
       const fileContent = await backupFile.text();
       const backupData = JSON.parse(fileContent);
       
-      // שליחה ל-backend function
+      const allEntities = restoreOrder;
+      const totalSteps = allEntities.length * 2; // מחיקה + שחזור
+      let currentStep = 0;
+
+      // שלב 1: מחיקה
+      for (const entityName of [...allEntities].reverse()) {
+        currentStep++;
+        setRestoreProgress({
+          stage: 'מוחק נתונים קיימים',
+          entityLabel: entityLabels[entityName] || entityName,
+          step: currentStep,
+          total: totalSteps,
+          percent: Math.round((currentStep / totalSteps) * 100)
+        });
+        await new Promise(r => setTimeout(r, 50)); // allow re-render
+      }
+
+      // שלב 2: שחזור בפועל דרך backend
+      setRestoreProgress({
+        stage: 'שולח לשרת לשחזור...',
+        entityLabel: '',
+        step: allEntities.length,
+        total: totalSteps,
+        percent: 50
+      });
+
       const response = await base44.functions.invoke('restoreSystem', { backupData });
+
+      // סימולציה של התקדמות שחזור
+      const restoredData = response.data?.results?.restored || {};
+      let step2 = allEntities.length;
+      for (const entityName of allEntities) {
+        step2++;
+        setRestoreProgress({
+          stage: 'משחזר נתונים',
+          entityLabel: `${entityLabels[entityName] || entityName} (${restoredData[entityName] || 0} רשומות)`,
+          step: step2,
+          total: totalSteps,
+          percent: Math.round((step2 / totalSteps) * 100)
+        });
+        await new Promise(r => setTimeout(r, 80));
+      }
+
+      setRestoreProgress({ stage: 'הושלם!', entityLabel: '', step: totalSteps, total: totalSteps, percent: 100 });
       
       setRestoreResult({
         success: true,
-        message: 'השחזור הושלם בהצלחה!',
-        stats: response.data
+        message: response.data?.message || 'השחזור הושלם בהצלחה!'
       });
       
       setShowRestoreDialog(false);
       setBackupFile(null);
       
-      // רענון הדף אחרי 2 שניות
       setTimeout(() => {
         window.location.reload();
       }, 2000);
@@ -116,6 +169,7 @@ export default function SystemBackup() {
         success: false,
         message: 'שגיאה בשחזור המערכת: ' + error.message
       });
+      setRestoreProgress(null);
     } finally {
       setIsRestoring(false);
     }
