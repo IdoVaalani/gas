@@ -2,19 +2,8 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 
-export async function generateInvoicePDF({ invoice, customers, technicians, invoiceLines, allInvoices, base44Client }) {
+export async function generateInvoicePDF({ invoice, customers, technicians, invoiceLines }) {
   if (!invoice) return;
-
-  // אם אין מספר חשבונית - מייצרים אחד לפני הדפסה
-  if (!invoice.מספר_חשבונית && base44Client && allInvoices) {
-    const existingNumbers = allInvoices
-      .map(inv => parseInt(inv.מספר_חשבונית))
-      .filter(num => !isNaN(num));
-    const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 7619;
-    const invoiceNumber = nextNumber.toString();
-    await base44Client.entities.חשבונית.update(invoice.id, { מספר_חשבונית: invoiceNumber });
-    invoice = { ...invoice, מספר_חשבונית: invoiceNumber };
-  }
 
   const customer = customers.find(c => c.id === invoice.לקוח_id);
   const technician = technicians.find(t => t.id === invoice.טכנאי_id);
