@@ -2,8 +2,12 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 
-export async function generateInvoicePDF({ invoice, customers, technicians, invoiceLines, allInvoices, onInvoiceNumberGenerated, items }) {
+export async function generateInvoicePDF({ invoice, customers, technicians, invoiceLines, allInvoices, onInvoiceNumberGenerated, items, override493, overrideDate }) {
   if (!invoice) return;
+
+  // Apply overrides
+  if (override493) invoice = { ...invoice, מספר_493: override493 };
+  if (overrideDate) invoice = { ...invoice, תאריך: overrideDate };
 
   // אם אין מספר חשבונית - מייצרים אחד לפני הדפסה
   if (!invoice.מספר_חשבונית) {
