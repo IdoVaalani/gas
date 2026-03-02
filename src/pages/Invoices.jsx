@@ -1371,18 +1371,29 @@ export default function InvoicesPage() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => {
-                          // פתח אפליקציית סורק של מערכת ההפעלה
-                          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                            alert('תכונת הסריקה דורשת התקנת סורק בחומרה. אנא השתמש בכפתור "בחר קובץ" להעלאת קובץ PDF');
-                          } else {
-                            alert('הדפדפן שלך לא תומך בסריקה ישירה. אנא השתמש בכפתור "בחר קובץ"');
+                        onClick={async () => {
+                          setUploadingFile(true);
+                          try {
+                            const response = await base44.functions.invoke('scanDocument', {
+                              invoiceId: currentInvoiceId
+                            });
+                            
+                            if (response.data.success) {
+                              alert(response.data.message);
+                              await queryClient.invalidateQueries({ queryKey: ['מסמך_חשבונית'] });
+                            } else {
+                              alert('שגיאה בסריקה: ' + (response.data.error || 'שגיאה לא ידועה'));
+                            }
+                          } catch (error) {
+                            alert('שגיאה בסריקה: ' + error.message);
+                          } finally {
+                            setUploadingFile(false);
                           }
                         }}
                         disabled={uploadingFile}
                         className="whitespace-nowrap"
                       >
-                        סריקה
+                        {uploadingFile ? 'סורק...' : 'סריקה'}
                       </Button>
                     </div>
                     {uploadingFile && (
