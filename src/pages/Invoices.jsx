@@ -775,9 +775,7 @@ export default function InvoicesPage() {
       const lineTotal = quantity * (line.מחיר_יחידה || 0) * (1 - (line.הנחה_אחוז || 0) / 100);
       subtotal += lineTotal;
     });
-    const vat = subtotal * 0.18;
-    const total = subtotal + vat;
-    return { subtotal, vat, total };
+    return { subtotal, vat: 0, total: subtotal };
   };
 
   const currentTotals = calculateCurrentTotals();
