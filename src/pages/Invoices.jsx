@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Edit, Trash2, Receipt, Search, Printer, Eye, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, FileText, Download, DollarSign, Calendar } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { generateInvoicePDF as generatePDF } from "@/components/invoices/generateInvoicePDFUtil";
 import InvoiceLineItemsDialog from "@/components/invoices/InvoiceLineItemsDialog";
 
