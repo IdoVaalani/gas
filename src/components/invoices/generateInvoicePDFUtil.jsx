@@ -146,51 +146,87 @@ export async function generateInvoicePDF({ invoice, customers, technicians, invo
   }
   pdf.save(`חשבון-${invoice.מספר_חשבונית || invoice.קוד_מערכת}.pdf`);
 
-  // --- Page 2: Item lines (if any) ---
+  // --- Page 2: Item lines - same format as renderMaterialsReport ---
   if (itemLines.length > 0) {
+    const creditLines = allLines.filter(l => l.סוג_שורה === 'זיכוי_מלאי').sort((a, b) => {
+      if ((a.מיון_שורות || 1) !== (b.מיון_שורות || 1)) return (a.מיון_שורות || 1) - (b.מיון_שורות || 1);
+      return new Date(a.created_date).getTime() - new Date(b.created_date).getTime();
+    });
+
     const container2 = document.createElement('div');
-    container2.style.cssText = 'position:absolute;right:-9999px;width:210mm;background:white;direction:rtl;';
+    container2.style.cssText = 'position:absolute;right:-9999px;width:210mm;background:white;direction:rtl;font-family:Arial,sans-serif;font-size:11px;color:#000;';
     document.body.appendChild(container2);
 
     container2.innerHTML = `
-      <div style="font-family: Arial, sans-serif; padding: 15px; background: white; color: #000; direction: rtl;">
-        <div style="max-width: 900px; margin: 0 auto; background: white; padding: 10px;">
-          <div style="text-align: center; margin-bottom: 10px;">
-            <div style="font-size: 36px; font-weight: bold; color: #ff0000; letter-spacing: 2px; margin-bottom: 3px;">בן שלום שאלתיאל</div>
-            <div style="font-size: 16px; color: #ff0000; margin-bottom: 6px;">טכנאי גז ותיקונים</div>
+      <div style="max-width: 900px; margin: 0 auto; background: white; border: 2px solid #000; padding: 10px; direction: rtl;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 2px solid #000;">
+          <div style="flex: 1; text-align: center;">
+            <div style="font-size: 16px; font-weight: bold; color: #ff0000; margin-bottom: 5px;">דו"ח הוצאת חומרים ע"י הקבלן לעבודות תשתיות - לזיכוי</div>
+            <div style="font-size: 13px;">טופס 493 א' מס' ${invoice.מספר_493 || invoice.מספר_דוח || ''}</div>
           </div>
-          <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 12px; border-bottom: 2px solid #000; padding-bottom: 8px;">
-            דוח חומרים - חשבון ${invoice.מספר_חשבונית || invoice.קוד_מערכת} | ${invoiceDate}
+          <div style="text-align: right; min-width: 200px; font-size: 12px;">
+            <div style="margin-bottom: 5px;"><strong>שם:</strong> ${technician ? technician.שם_טכנאי : 'בן שלום שאלתיאל'}</div>
+            <div><strong>קוד:</strong> 68</div>
           </div>
-          <div style="margin-bottom: 10px; font-size: 13px;">
-            לקוח: ${customer?.שם_לקוח || ''}
-            ${invoice.מספר_דוח ? ` | הוראת עבודה: ${invoice.מספר_דוח}` : ''}
+        </div>
+
+        <div style="border: 2px solid #000; padding: 8px; margin-bottom: 8px; font-size: 11px;">
+          <div style="margin-bottom: 3px;"><strong>מרכזייה\\צרכן:</strong> ${customer?.שם_לקוח || 'לא צוין'}</div>
+          <div style="margin-bottom: 3px;"><strong>כתובת:</strong> ${customer?.כתובת || 'לא צוינה'}</div>
+          <div><strong>תאריך:</strong> ${invoiceDate}</div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 10px 0; border: 2px solid #000;">
+          <thead>
+            <tr>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">מק"ט</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">תיאור פריט</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">כמות</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">מחיר</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">סה"כ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemLines.map(line => {
+              const catalogNumber = line.מספר_קטלוג || '-';
+              return `<tr>
+                <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${catalogNumber}</td>
+                <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.תיאור}</td>
+                <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.כמות || 1}</td>
+                <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.מחיר_יחידה?.toFixed(2) || '0.00'}</td>
+                <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.סכום_שורה?.toFixed(2) || '0.00'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+
+        ${creditLines.length > 0 ? `
+        <div style="font-size: 13px; font-weight: bold; margin: 15px 0 5px 0; color: #333;">זיכוי חומרים:</div>
+        <table style="width: 60%; border-collapse: collapse; margin: 10px 0; border: 2px solid #000;">
+          <thead>
+            <tr>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">מס' קטלוגי</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">תיאור פריטים</th>
+              <th style="border: 1px solid #000; padding: 5px 6px; text-align: center; font-size: 11px; background: #f5f5f5; font-weight: bold;">כמות</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${creditLines.map(line => `<tr>
+              <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.מספר_קטלוג || '-'}</td>
+              <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.תיאור}</td>
+              <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.כמות || 1}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        ` : ''}
+
+        <div style="display: flex; gap: 20px; margin-top: 15px;">
+          <div style="flex: 1; border: 2px solid #000; padding: 10px; text-align: center;">
+            <div style="font-size: 14px; margin-bottom: 5px;"><strong>סה"כ זיכוי כספי חומרים</strong></div>
+            <div style="font-size: 16px; font-weight: bold;">₪${itemsSubtotal.toFixed(2)}</div>
           </div>
-          <table style="width: 100%; border-collapse: collapse; margin: 12px 0; border: 2px solid #000;">
-            <thead>
-              <tr>
-                <th style="border: 2px solid #000; padding: 5px 6px; text-align: center; font-size: 12px; font-weight: bold; width: 10%;">כמות</th>
-                <th style="border: 2px solid #000; padding: 5px 6px; text-align: center; font-size: 12px; font-weight: bold; width: 55%;">פריט</th>
-                <th style="border: 2px solid #000; padding: 5px 6px; text-align: center; font-size: 12px; font-weight: bold; width: 15%;">מחיר יח'</th>
-                <th style="border: 2px solid #000; padding: 5px 6px; text-align: center; font-size: 12px; font-weight: bold; width: 20%;">סה"כ</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemLines.map(line => {
-                const lt = (line.כמות || 0) * (line.מחיר_יחידה || 0) * (1 - ((line.הנחה_אחוז || 0) / 100));
-                return `<tr>
-                  <td style="border: 2px solid #000; padding: 4px 6px; text-align: center; font-size: 12px;">${line.כמות || ''}</td>
-                  <td style="border: 2px solid #000; padding: 4px 6px; text-align: right; padding-right: 10px; font-size: 12px;">${line.תיאור}</td>
-                  <td style="border: 2px solid #000; padding: 4px 6px; text-align: center; font-size: 12px;">${line.מחיר_יחידה?.toFixed(2) || '0.00'}</td>
-                  <td style="border: 2px solid #000; padding: 4px 6px; text-align: center; font-size: 12px;">${lt.toFixed(2)}</td>
-                </tr>`;
-              }).join('')}
-            </tbody>
-          </table>
-          <div style="margin-top: 12px; font-size: 14px; border-top: 2px solid #000; padding-top: 8px; text-align: left;">
-            <div>סה"כ חומרים (לפני מע"מ): ₪${itemsSubtotal.toFixed(2)}</div>
-            <div style="font-weight: bold;">מע"מ 18%: ₪${itemsVat.toFixed(2)}</div>
-            <div style="font-weight: bold; font-size: 16px;">סה"כ כולל מע"מ: ₪${(itemsSubtotal + itemsVat).toFixed(2)}</div>
+          <div style="flex: 1; border: 2px solid #000; padding: 10px; text-align: center;">
+            <div style="font-size: 14px;"><strong>חשבון מס'</strong> ${invoice.מספר_חשבונית || ''} <strong>מיום</strong> ${invoiceDate}</div>
           </div>
         </div>
       </div>
@@ -205,6 +241,6 @@ export async function generateInvoicePDF({ invoice, customers, technicians, invo
     const imgWidth2 = pdfWidth2;
     const imgHeight2 = (canvas2.height * imgWidth2) / canvas2.width;
     pdf2.addImage(imgData2, 'PNG', 10, 10, imgWidth2, imgHeight2);
-    pdf2.save(`חשבון-${invoice.מספר_חשבונית || invoice.קוד_מערכט}-חומרים.pdf`);
+    pdf2.save(`חשבון-${invoice.מספר_חשבונית || invoice.קוד_מערכת}-חומרים.pdf`);
   }
 }
