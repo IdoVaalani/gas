@@ -492,6 +492,7 @@ export default function InvoicesPage() {
 
     const linesToCreate = [];
 
+    // Add the selected item/work line
     linesToCreate.push({
       חשבונית_id: currentInvoiceId,
       פריט_id: lineItemForm.פריט_id || null,
@@ -504,6 +505,7 @@ export default function InvoicesPage() {
       סכום_שורה: lineTotal
     });
 
+    // Add linked works ONLY if they're enabled and the item has them
     const selectedItem = lineItemForm.פריט_id ? items.find(i => i.id === lineItemForm.פריט_id) : null;
     const hasLinkedWorks = selectedItem &&
                           selectedItem.עבודות_מקושרות &&
@@ -517,7 +519,7 @@ export default function InvoicesPage() {
       );
 
       if (linkedWorkItems.length > 0) {
-        linkedWorkItems.forEach((linkedWorkItem, index) => {
+        linkedWorkItems.forEach((linkedWorkItem) => {
           const workLineTotal = (parseFloat(lineItemForm.כמות) || 0) * (parseFloat(linkedWorkItem.מחיר_מכירה) || 0);
           linesToCreate.push({
             חשבונית_id: currentInvoiceId,
