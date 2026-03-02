@@ -141,7 +141,7 @@ export default function SystemBackup() {
       
       setRestoreResult({
         success: true,
-        message: response.data?.message || 'השחזור הושלם בהצלחה!'
+        message: 'השחזור הושלם בהצלחה!'
       });
       
       setShowRestoreDialog(false);
