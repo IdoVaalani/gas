@@ -107,7 +107,7 @@ export default function SystemBackup() {
       const backupData = JSON.parse(fileContent);
       
       const allEntities = restoreOrder;
-      const totalSteps = allEntities.length * 2; // מחיקה + שחזור
+      const totalSteps = allEntities.length;
       let currentStep = 0;
 
       // שחזור בלבד (update/create) - ללא מחיקה
