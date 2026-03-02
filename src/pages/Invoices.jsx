@@ -630,16 +630,30 @@ export default function InvoicesPage() {
     executePrintAction(invoiceId, 'both');
   };
 
-  const generateInvoicePDF = async (invoiceId) => {
+  const generateInvoicePDF = (invoiceId) => {
     const invoice = invoices.find(inv => inv.id === invoiceId);
     if (!invoice) return;
+    setPdfTargetInvoice(invoice);
+    setShowPDFDialog(true);
+  };
+
+  const handlePDFDialogConfirm = async ({ מספר_493, תאריך }) => {
+    setShowPDFDialog(false);
+    const { base44: b44 } = await import('@/api/base44Client');
+    // Save 493 and date back to the invoice
+    await b44.entities.חשבונית.update(pdfTargetInvoice.id, { מספר_493, תאריך });
+    queryClient.invalidateQueries({ queryKey: ['חשבונית'] });
+
+    const updatedInvoice = { ...pdfTargetInvoice, מספר_493, תאריך };
     await generatePDF({
-      invoice,
+      invoice: updatedInvoice,
       customers,
       technicians,
       invoiceLines,
       allInvoices: invoices,
       items,
+      override493: מספר_493,
+      overrideDate: תאריך,
       onInvoiceNumberGenerated: () => queryClient.invalidateQueries({ queryKey: ['חשבונית'] })
     });
   };
