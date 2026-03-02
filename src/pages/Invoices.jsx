@@ -1579,7 +1579,12 @@ export default function InvoicesPage() {
                       <TableCell className="font-medium whitespace-nowrap">{invoice.מספר_חשבונית}</TableCell>
                       <TableCell className="font-medium text-purple-600 whitespace-nowrap">{invoice.מספר_דוח || '-'}</TableCell>
                       <TableCell className="font-medium text-blue-600 whitespace-nowrap">{invoice.מספר_493 || '-'}</TableCell>
-                      <TableCell className="whitespace-nowrap">{getCustomerName(invoice.לקוח_id)}</TableCell>
+                      <TableCell>
+                        <div className="whitespace-nowrap font-medium">{getCustomerName(invoice.לקוח_id)}</div>
+                        <div className="text-xs text-gray-600 max-w-xs truncate">
+                          {customers.find(c => c.id === invoice.לקוח_id)?.כתובת || '-'}
+                        </div>
+                      </TableCell>
                       <TableCell className="whitespace-nowrap">{format(new Date(invoice.תאריך), 'dd/MM/yyyy')}</TableCell>
                       <TableCell className="font-bold text-gray-900 whitespace-nowrap">
                         ₪{invoice.סכום_כולל?.toFixed(2) || '0.00'}
