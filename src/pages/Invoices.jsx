@@ -1528,7 +1528,7 @@ export default function InvoicesPage() {
                       onClick={() => handleSort('לקוח')}
                     >
                       <div className="flex items-center gap-2 whitespace-nowrap">
-                        לקוח
+                        לקוח וכתובת
                         <SortIcon field="לקוח" />
                       </div>
                     </TableHead>
