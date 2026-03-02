@@ -225,8 +225,11 @@ export async function generateInvoicePDF({ invoice, customers, technicians, invo
             </tr>
           </thead>
           <tbody>
-            ${creditLines.map(line => `<tr>
-              <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.מספר_קטלוג || '-'}</td>
+            ${creditLines.map(line => {
+              const linkedItem = items ? items.find(i => i.id === line.פריט_id) : null;
+              const creditCatalog = linkedItem?.מספר_קטלוג || line.מספר_קטלוג || '-';
+              return `<tr>
+              <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${creditCatalog}</td>
               <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.תיאור}</td>
               <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.כמות || 1}</td>
             </tr>`).join('')}
