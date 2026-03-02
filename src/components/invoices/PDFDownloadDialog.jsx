@@ -9,11 +9,13 @@ import { Download } from "lucide-react";
 export default function PDFDownloadDialog({ open, onOpenChange, invoice, onConfirm }) {
   const [num493, setNum493] = useState(invoice?.מספר_493 || "");
   const [invoiceDate, setInvoiceDate] = useState(invoice?.תאריך || new Date().toISOString().split('T')[0]);
+  const [isCopy, setIsCopy] = useState(false);
 
   React.useEffect(() => {
     if (open && invoice) {
       setNum493(invoice.מספר_493 || "");
       setInvoiceDate(invoice.תאריך || new Date().toISOString().split('T')[0]);
+      setIsCopy(false);
     }
   }, [open, invoice]);
 
@@ -22,7 +24,7 @@ export default function PDFDownloadDialog({ open, onOpenChange, invoice, onConfi
       alert("יש להזין מספר 493");
       return;
     }
-    onConfirm({ מספר_493: num493.trim(), תאריך: invoiceDate });
+    onConfirm({ מספר_493: num493.trim(), תאריך: invoiceDate, isCopy });
   };
 
   return (
