@@ -142,6 +142,14 @@ export default function Layout({ children }) {
 
   return (
     <SidebarProvider>
+      <style>{`
+        table { border-collapse: collapse !important; }
+        thead tr { border-bottom: 2px solid #d1d5db !important; }
+        tbody tr { border-bottom: 1px solid #e5e7eb !important; }
+        tbody tr:last-child { border-bottom: 1px solid #e5e7eb !important; }
+        th, td { border-left: 1px solid #e5e7eb !important; padding: 8px 12px !important; }
+        th:last-child, td:last-child { border-left: none !important; }
+      `}</style>
       <div className="min-h-screen flex w-full bg-gray-50" dir="rtl" lang="he">
         {/* Desktop Sidebar */}
         <Sidebar side="right" className="hidden lg:flex border-l border-gray-200">
