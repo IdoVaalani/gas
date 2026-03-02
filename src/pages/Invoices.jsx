@@ -637,7 +637,7 @@ export default function InvoicesPage() {
     setShowPDFDialog(true);
   };
 
-  const handlePDFDialogConfirm = async ({ מספר_493, תאריך }) => {
+  const handlePDFDialogConfirm = async ({ מספר_493, תאריך, isCopy }) => {
     setShowPDFDialog(false);
     const { base44: b44 } = await import('@/api/base44Client');
     // Save 493 and date back to the invoice
@@ -654,6 +654,7 @@ export default function InvoicesPage() {
       items,
       override493: מספר_493,
       overrideDate: תאריך,
+      isCopy,
       onInvoiceNumberGenerated: () => queryClient.invalidateQueries({ queryKey: ['חשבונית'] })
     });
   };
