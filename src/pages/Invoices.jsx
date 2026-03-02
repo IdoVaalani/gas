@@ -15,6 +15,7 @@ import { format } from "date-fns";
 
 import { generateInvoicePDF as generatePDF } from "@/components/invoices/generateInvoicePDFUtil";
 import InvoiceLineItemsDialog from "@/components/invoices/InvoiceLineItemsDialog";
+import PDFDownloadDialog from "@/components/invoices/PDFDownloadDialog";
 
 export default function InvoicesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
