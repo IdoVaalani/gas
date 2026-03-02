@@ -237,15 +237,17 @@ export async function generateInvoicePDF({ invoice, customers, technicians, invo
         </table>
         ` : ''}
 
-        <div style="display: flex; gap: 20px; margin-top: 15px;">
-          <div style="flex: 1; border: 2px solid #000; padding: 10px; text-align: center;">
-            <div style="font-size: 14px; margin-bottom: 5px;"><strong>סה"כ זיכוי כספי חומרים</strong></div>
-            <div style="font-size: 16px; font-weight: bold;">₪${itemsSubtotal.toFixed(2)}</div>
-          </div>
-          <div style="flex: 1; border: 2px solid #000; padding: 10px; text-align: center;">
-            <div style="font-size: 14px;"><strong>חשבון מס'</strong> ${invoice.מספר_חשבונית || ''} <strong>מיום</strong> ${invoiceDate}</div>
-          </div>
-        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; border: 2px solid #000;">
+          <tr>
+            <td style="border: 2px solid #000; padding: 10px; text-align: center; width: 50%;">
+              <div style="font-size: 14px; margin-bottom: 5px;"><strong>סה"כ זיכוי כספי חומרים</strong></div>
+              <div style="font-size: 16px; font-weight: bold;">₪${itemsSubtotal.toFixed(2)}</div>
+            </td>
+            <td style="border: 2px solid #000; padding: 10px; text-align: center; width: 50%;">
+              <div style="font-size: 14px;"><strong>חשבון מס'</strong> ${invoice.מספר_חשבונית || ''} <strong>מיום</strong> ${invoiceDate}</div>
+            </td>
+          </tr>
+        </table>
       </div>
     `;
 
