@@ -110,7 +110,7 @@ export default function SystemBackup() {
       const totalSteps = allEntities.length * 2; // מחיקה + שחזור
       let currentStep = 0;
 
-      // שלב 1: מחיקה
+      // שלב 1: מחיקה - כל entity בנפרד
       for (const entityName of [...allEntities].reverse()) {
         currentStep++;
         setRestoreProgress({
@@ -120,33 +120,21 @@ export default function SystemBackup() {
           total: totalSteps,
           percent: Math.round((currentStep / totalSteps) * 100)
         });
-        await new Promise(r => setTimeout(r, 50)); // allow re-render
+        await base44.functions.invoke('restoreSystem', { backupData: { data: {} }, phase: 'delete', entityName });
       }
 
-      // שלב 2: שחזור בפועל דרך backend
-      setRestoreProgress({
-        stage: 'שולח לשרת לשחזור...',
-        entityLabel: '',
-        step: allEntities.length,
-        total: totalSteps,
-        percent: 50
-      });
-
-      const response = await base44.functions.invoke('restoreSystem', { backupData });
-
-      // סימולציה של התקדמות שחזור
-      const restoredData = response.data?.results?.restored || {};
+      // שלב 2: שחזור - כל entity בנפרד
       let step2 = allEntities.length;
       for (const entityName of allEntities) {
         step2++;
         setRestoreProgress({
           stage: 'משחזר נתונים',
-          entityLabel: `${entityLabels[entityName] || entityName} (${restoredData[entityName] || 0} רשומות)`,
+          entityLabel: entityLabels[entityName] || entityName,
           step: step2,
           total: totalSteps,
           percent: Math.round((step2 / totalSteps) * 100)
         });
-        await new Promise(r => setTimeout(r, 80));
+        await base44.functions.invoke('restoreSystem', { backupData, phase: 'restore', entityName });
       }
 
       setRestoreProgress({ stage: 'הושלם!', entityLabel: '', step: totalSteps, total: totalSteps, percent: 100 });
