@@ -629,7 +629,14 @@ export default function InvoicesPage() {
   const generateInvoicePDF = async (invoiceId) => {
     const invoice = invoices.find(inv => inv.id === invoiceId);
     if (!invoice) return;
-    await generatePDF({ invoice, customers, technicians, invoiceLines });
+    await generatePDF({
+      invoice,
+      customers,
+      technicians,
+      invoiceLines,
+      allInvoices: invoices,
+      onInvoiceNumberGenerated: () => queryClient.invalidateQueries({ queryKey: ['חשבונית'] })
+    });
   };
 
   const handleFileUpload = async (e) => {
