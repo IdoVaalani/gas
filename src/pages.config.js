@@ -55,6 +55,7 @@ import Quotes from './pages/Quotes';
 import Reports from './pages/Reports';
 import SystemBackup from './pages/SystemBackup';
 import Technicians from './pages/Technicians';
+import Works from './pages/Works';
 import __Layout from './Layout.jsx';
 
 
@@ -67,6 +68,7 @@ export const PAGES = {
     "Reports": Reports,
     "SystemBackup": SystemBackup,
     "Technicians": Technicians,
+    "Works": Works,
 }
 
 export const pagesConfig = {
