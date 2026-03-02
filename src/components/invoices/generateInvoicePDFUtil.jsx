@@ -2,7 +2,7 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 
-export async function generateInvoicePDF({ invoice, customers, technicians, invoiceLines, allInvoices, onInvoiceNumberGenerated, items, override493, overrideDate }) {
+export async function generateInvoicePDF({ invoice, customers, technicians, invoiceLines, allInvoices, onInvoiceNumberGenerated, items, override493, overrideDate, isCopy }) {
   if (!invoice) return;
 
   // Apply overrides
