@@ -44,10 +44,6 @@ export async function generateInvoicePDF({ invoice, customers, technicians, invo
   itemLines.forEach(line => {
     itemsSubtotal += (line.כמות || 0) * (line.מחיר_יחידה || 0) * (1 - ((line.הנחה_אחוז || 0) / 100));
   });
-
-  const laborVat = laborSubtotal * 0.18;
-  const laborTotal = laborSubtotal + laborVat;
-  const itemsVat = itemsSubtotal * 0.18;
   const invoiceDate = format(new Date(invoice.תאריך), 'dd/MM/yyyy');
 
   // --- Page 1: Work lines ---
