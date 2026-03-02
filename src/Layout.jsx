@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
@@ -137,7 +136,7 @@ export default function Layout({ children }) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50" dir="rtl">
+      <div className="min-h-screen flex w-full bg-gray-50" dir="rtl" lang="he">
         {/* Desktop Sidebar */}
         <Sidebar side="right" className="hidden lg:flex border-l border-gray-200">
           <SidebarHeader className="border-b border-gray-200 p-4">
