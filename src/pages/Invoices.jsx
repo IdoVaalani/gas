@@ -62,6 +62,9 @@ export default function InvoicesPage() {
   const [pending493Action, setPending493Action] = useState(null);
   const [num493Input, setNum493Input] = useState("");
 
+  const [showPDFDialog, setShowPDFDialog] = useState(false);
+  const [pdfTargetInvoice, setPdfTargetInvoice] = useState(null);
+
   const [lineItemForm, setLineItemForm] = useState({
     פריט_id: "",
     תיאור: "",
