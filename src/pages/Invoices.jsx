@@ -329,14 +329,11 @@ export default function InvoicesPage() {
       total += lineTotal;
     }
 
-    const vat = total * 0.18;
-    const totalWithVat = total + vat;
-
-    // Update the invoice's total amounts
+    // Update the invoice's total amounts (no VAT)
     await base44.entities.חשבונית.update(invoiceId, {
       סכום_לפני_מעם: total,
-      מעם: vat,
-      סכום_כולל: totalWithVat,
+      מעם: 0,
+      סכום_כולל: total,
     });
 
     queryClient.invalidateQueries({ queryKey: ['חשבונית'] });
