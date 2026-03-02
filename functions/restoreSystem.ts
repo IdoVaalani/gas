@@ -37,9 +37,9 @@ Deno.serve(async (req) => {
           break;
         } catch (e) {
           if (e.message && (e.message.includes('not found') || e.message.includes('404'))) {
-            // Record doesn't exist → create
+            // Record doesn't exist → create (without id, let the system generate it)
             try {
-              await base44.asServiceRole.entities[entityName].create({ id, ...recordData });
+              const created = await base44.asServiceRole.entities[entityName].create(recordData);
               restoredCount++;
               success = true;
             } catch (e2) {
