@@ -63,7 +63,7 @@ export async function generateInvoicePDF({ invoice, customers, technicians, invo
             <div>טכנאי גז רמת 2</div>
             <div>מס' ההסמכה ${technician?.מספר_הסמכה || '1254'}</div>
           </div>
-          <div style="font-size: 16px; font-weight: bold; padding-top: 20px;">העתק</div>
+          <div style="font-size: 16px; font-weight: bold; padding-top: 20px;">${isCopy ? 'העתק' : ''}</div>
           <div style="border: 2px solid #000; padding: 5px 8px; text-align: center; line-height: 1.3; width: 160px;">
             <div>עוסק מורשה למע"מ</div>
             <div>מס' 056510639</div>
