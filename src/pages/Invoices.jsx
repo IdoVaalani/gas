@@ -526,7 +526,7 @@ export default function InvoicesPage() {
             מחיר_יחידה: parseFloat(linkedWorkItem.מחיר_מכירה) || 0,
             הנחה_אחוז: 0,
             סוג_שורה: 'עבודה',
-            מיון_שורות: (parseFloat(lineItemForm.מיון_שורות) || 1) + 0.01 * (index + 1),
+            מיון_שורות: (parseInt(lineItemForm.מיון_שורות) || 1),
             סכום_שורה: workLineTotal
           });
         });
