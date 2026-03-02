@@ -1689,7 +1689,8 @@ export default function InvoicesPage() {
                         </div>
                       )}
                       <div className="text-sm text-gray-600 mb-1">
-                        {getCustomerName(invoice.לקוח_id)}
+                        <div className="font-medium">{getCustomerName(invoice.לקוח_id)}</div>
+                        <div className="text-xs text-gray-500">{customers.find(c => c.id === invoice.לקוח_id)?.כתובת || '-'}</div>
                       </div>
                     </div>
                     <Badge className={statusColors[invoice.סטטוס]}>
