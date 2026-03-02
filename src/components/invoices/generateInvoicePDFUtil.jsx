@@ -124,14 +124,6 @@ export async function generateInvoicePDF({ invoice, customers, technicians, invo
               <td style="border: 2px solid #000; padding: 8px 12px; font-size: 14px; text-align: right;">סה"כ</td>
               <td style="border: 2px solid #000; padding: 8px 12px; font-size: 14px; text-align: center; font-weight: bold;">₪${laborSubtotal.toFixed(2)}</td>
             </tr>
-            <tr>
-              <td style="border: 2px solid #000; padding: 8px 12px; font-size: 14px; text-align: right;">מע"מ בשיעור 18%</td>
-              <td style="border: 2px solid #000; padding: 8px 12px; font-size: 14px; text-align: center; font-weight: bold;">₪${laborVat.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td style="border: 2px solid #000; padding: 8px 12px; font-size: 14px; text-align: right;">סכום כולל מע"מ</td>
-              <td style="border: 2px solid #000; padding: 8px 12px; font-size: 14px; text-align: center; font-weight: bold;">₪${laborTotal.toFixed(2)}</td>
-            </tr>
           </table>
         </div>
       </div>
