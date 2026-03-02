@@ -1015,7 +1015,7 @@ export default function ItemsPage() {
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-3">
+                <TabsList className="grid w-full max-w-md grid-cols-4">
                   <TabsTrigger value="all">
                     הכל ({items.length})
                   </TabsTrigger>
@@ -1024,6 +1024,9 @@ export default function ItemsPage() {
                   </TabsTrigger>
                   <TabsTrigger value="work">
                     עבודות ({workCount})
+                  </TabsTrigger>
+                  <TabsTrigger value="linked">
+                    עם עבודות ({linkedCount})
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
