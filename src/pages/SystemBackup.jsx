@@ -110,20 +110,7 @@ export default function SystemBackup() {
       const totalSteps = allEntities.length * 2; // מחיקה + שחזור
       let currentStep = 0;
 
-      // שלב 1: מחיקה - כל entity בנפרד
-      for (const entityName of [...allEntities].reverse()) {
-        currentStep++;
-        setRestoreProgress({
-          stage: 'מוחק נתונים קיימים',
-          entityLabel: entityLabels[entityName] || entityName,
-          step: currentStep,
-          total: totalSteps,
-          percent: Math.round((currentStep / totalSteps) * 100)
-        });
-        await base44.functions.invoke('restoreSystem', { backupData: { data: {} }, phase: 'delete', entityName });
-      }
-
-      // שלב 2: שחזור - כל entity בנפרד
+      // שחזור בלבד (update/create) - ללא מחיקה
       let step2 = allEntities.length;
       for (const entityName of allEntities) {
         step2++;
