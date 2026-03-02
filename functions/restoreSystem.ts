@@ -13,80 +13,57 @@ Deno.serve(async (req) => {
 
     const { backupData, phase, entityName } = await req.json();
 
-    if (!backupData || !backupData.data === undefined) {
+    if (!backupData) {
       return Response.json({ error: 'Invalid backup file' }, { status: 400 });
     }
 
-    // Phase: delete one entity - sequentially with delay
-    if (phase === 'delete') {
-      let deletedCount = 0;
-      let hasMore = true;
-      let page = 0;
-
-      while (hasMore && page < 100) {
-        let records;
-        try {
-          records = await base44.asServiceRole.entities[entityName].list('created_date', 50);
-        } catch (e) {
-          await sleep(1000);
-          records = await base44.asServiceRole.entities[entityName].list('created_date', 50);
-        }
-
-        if (!records || records.length === 0) break;
-
-        // Delete one by one with small delay to avoid rate limit
-        for (const record of records) {
-          try {
-            await base44.asServiceRole.entities[entityName].delete(record.id);
-            deletedCount++;
-          } catch (e) {
-            // If rate limited, wait and retry
-            if (e.message && e.message.includes('Rate limit')) {
-              await sleep(500);
-              try {
-                await base44.asServiceRole.entities[entityName].delete(record.id);
-                deletedCount++;
-              } catch (_) {}
-            }
-          }
-          await sleep(50); // 50ms between each delete
-        }
-
-        if (records.length < 50) hasMore = false;
-        page++;
-      }
-
-      return Response.json({ success: true, deleted: deletedCount });
-    }
-
-    // Phase: restore one entity - sequentially with delay
+    // Phase: restore one entity using update (upsert) - no delete needed
     if (phase === 'restore') {
-      if (!backupData.data) {
-        return Response.json({ error: 'No data in backup' }, { status: 400 });
-      }
-      const records = backupData.data[entityName] || [];
+      const records = (backupData.data || {})[entityName] || [];
       let restoredCount = 0;
       const errors = [];
 
       for (const record of records) {
-        const { created_date, updated_date, created_by, ...recordData } = record;
-        try {
-          await base44.asServiceRole.entities[entityName].create({ id: record.id, ...recordData });
-          restoredCount++;
-        } catch (e) {
-          if (e.message && e.message.includes('Rate limit')) {
-            await sleep(500);
-            try {
-              await base44.asServiceRole.entities[entityName].create({ id: record.id, ...recordData });
-              restoredCount++;
-            } catch (e2) {
-              errors.push(e2.message);
+        const { created_date, updated_date, created_by, id, ...recordData } = record;
+        let success = false;
+
+        // Try update first, then create
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            await base44.asServiceRole.entities[entityName].update(id, recordData);
+            restoredCount++;
+            success = true;
+            break;
+          } catch (e) {
+            if (e.message && e.message.includes('not found')) {
+              // Record doesn't exist, create it
+              try {
+                await base44.asServiceRole.entities[entityName].create({ id, ...recordData });
+                restoredCount++;
+                success = true;
+                break;
+              } catch (e2) {
+                if (e2.message && e2.message.includes('Rate limit')) {
+                  await sleep(600);
+                } else {
+                  errors.push(`${entityName}/${id}: ${e2.message}`);
+                  break;
+                }
+              }
+            } else if (e.message && e.message.includes('Rate limit')) {
+              await sleep(600);
+            } else {
+              errors.push(`${entityName}/${id}: ${e.message}`);
+              break;
             }
-          } else {
-            errors.push(e.message);
           }
         }
-        await sleep(50); // 50ms between each create
+
+        if (!success && !errors.find(er => er.startsWith(`${entityName}/${id}`))) {
+          errors.push(`${entityName}/${id}: failed after retries`);
+        }
+
+        await sleep(60);
       }
 
       return Response.json({ success: true, restored: restoredCount, errors });
