@@ -374,7 +374,7 @@ export default function ItemsPage() {
       שם_פריט: formData.שם_פריט,
       תיאור: formData.תיאור || "",
       סוג_פריט: formData.סוג_פריט || "פריט",
-      מחיר_מכירה: parseFloat(formData.מחיר_מכירה),
+      מחיר_מכירה: Math.round(parseFloat(formData.מחיר_מכירה) * 100) / 100,
       עבודות_מקושרות: linkedWorksRef.current.length > 0 ? [...linkedWorksRef.current] : [],
       פעיל: formData.פעיל
     };

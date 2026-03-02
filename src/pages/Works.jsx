@@ -206,7 +206,7 @@ export default function WorksPage() {
       שם_פריט: formData.שם_פריט,
       תיאור: formData.תיאור || "",
       סוג_פריט: "עבודה",
-      מחיר_מכירה: parseFloat(formData.מחיר_מכירה),
+      מחיר_מכירה: Math.round(parseFloat(formData.מחיר_מכירה) * 100) / 100,
       עבודות_מקושרות: [],
       פעיל: formData.פעיל
     };
