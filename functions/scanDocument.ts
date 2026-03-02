@@ -16,44 +16,31 @@ Deno.serve(async (req) => {
     }
 
     const scannerIP = '10.0.0.16';
-    const scannerUrl = `http://${scannerIP}/API/1`;
+    
+    // Try multiple possible URLs for the scanner API
+    const possibleUrls = [
+      `http://${scannerIP}:8080/API/1/Scan`,
+      `http://${scannerIP}:80/API/1/Scan`,
+      `http://${scannerIP}/API/1/Scan`,
+      `http://${scannerIP}:8080/Scan`,
+      `http://${scannerIP}/Scan`
+    ];
 
-    // Attempt to scan and get PDF
     let scannedData = null;
     let format = 'pdf';
+    let connectionError = null;
 
-    try {
-      // Try to scan as PDF
-      const scanResponse = await fetch(`${scannerUrl}/Scan`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          params: {
-            FileFormat: 'pdf',
-            Resolution: 200,
-            ColorMode: 'Grayscale',
-            Destination: 'Memory'
-          }
-        })
-      });
-
-      if (scanResponse.ok) {
-        const blob = await scanResponse.blob();
-        scannedData = new Uint8Array(await blob.arrayBuffer());
-      } else {
-        throw new Error('PDF scan failed');
-      }
-    } catch (error) {
-      console.log('PDF scan failed, trying JPEG:', error.message);
-      
+    for (const url of possibleUrls) {
       try {
-        // Fallback to JPEG
-        const scanResponse = await fetch(`${scannerUrl}/Scan`, {
+        console.log(`Trying URL: ${url}`);
+        
+        // Try to scan as PDF
+        const scanResponse = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             params: {
-              FileFormat: 'jpeg',
+              FileFormat: 'pdf',
               Resolution: 200,
               ColorMode: 'Grayscale',
               Destination: 'Memory'
@@ -64,16 +51,50 @@ Deno.serve(async (req) => {
         if (scanResponse.ok) {
           const blob = await scanResponse.blob();
           scannedData = new Uint8Array(await blob.arrayBuffer());
-          format = 'jpg';
-        } else {
-          throw new Error('JPEG scan also failed');
+          console.log('PDF scan successful');
+          break;
         }
-      } catch (jpegError) {
-        return Response.json(
-          { error: 'Scanner connection failed: ' + jpegError.message },
-          { status: 500 }
-        );
+      } catch (error) {
+        connectionError = error.message;
+        console.log(`Failed with ${url}: ${error.message}`);
       }
+    }
+
+    // If PDF failed, try JPEG
+    if (!scannedData) {
+      for (const url of possibleUrls) {
+        try {
+          const scanResponse = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              params: {
+                FileFormat: 'jpeg',
+                Resolution: 200,
+                ColorMode: 'Grayscale',
+                Destination: 'Memory'
+              }
+            })
+          });
+
+          if (scanResponse.ok) {
+            const blob = await scanResponse.blob();
+            scannedData = new Uint8Array(await blob.arrayBuffer());
+            format = 'jpg';
+            console.log('JPEG scan successful');
+            break;
+          }
+        } catch (error) {
+          connectionError = error.message;
+        }
+      }
+    }
+
+    if (!scannedData) {
+      return Response.json(
+        { error: 'Scanner not found on network. Make sure it\'s connected and powered on. Last error: ' + connectionError },
+        { status: 500 }
+      );
     }
 
     if (!scannedData) {
