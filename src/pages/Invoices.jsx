@@ -1360,15 +1360,35 @@ export default function InvoicesPage() {
 
                   <div>
                     <Label>בחר קובץ PDF *</Label>
-                    <Input
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileUpload}
-                      disabled={uploadingFile}
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleFileUpload}
+                        disabled={uploadingFile}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          // פתח אפליקציית סורק של מערכת ההפעלה
+                          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                            alert('תכונת הסריקה דורשת התקנת סורק בחומרה. אנא השתמש בכפתור "בחר קובץ" להעלאת קובץ PDF');
+                          } else {
+                            alert('הדפדפן שלך לא תומך בסריקה ישירה. אנא השתמש בכפתור "בחר קובץ"');
+                          }
+                        }}
+                        disabled={uploadingFile}
+                        className="whitespace-nowrap"
+                      >
+                        סריקה
+                      </Button>
+                    </div>
                     {uploadingFile && (
                       <p className="text-sm text-blue-600 mt-2">מעלה קובץ...</p>
                     )}
+                    <p className="text-xs text-gray-500 mt-1">כדי להשתמש בסריקה, התקן סורק בחומרה ותוכנה</p>
                   </div>
                 </div>
               </div>
