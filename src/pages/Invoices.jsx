@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateInvoicePDF as generatePDF } from "@/components/invoices/generateInvoicePDFUtil";
+import InvoiceLineItemsDialog from "@/components/invoices/InvoiceLineItemsDialog";
 
 export default function InvoicesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
