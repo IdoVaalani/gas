@@ -118,6 +118,12 @@ function IsraeliClock() {
 }
 
 export default function Layout({ children }) {
+  // Ensure global RTL on mount
+  React.useEffect(() => {
+    document.documentElement.setAttribute('dir', 'rtl');
+    document.documentElement.setAttribute('lang', 'he');
+    document.body.style.direction = 'rtl';
+  }, []);
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
