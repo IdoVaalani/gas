@@ -423,14 +423,27 @@ export default function ItemsPage() {
   };
 
   const filteredItems = items.filter(item => {
-    if (item.סוג_פריט !== "פריט") return false;
-    return item.שם_פריט?.includes(searchTerm) ||
+    // Search filter
+    const matchesSearch = item.שם_פריט?.includes(searchTerm) ||
       item.מספר_קטלוג?.includes(searchTerm) ||
       item.תיאור?.includes(searchTerm);
+
+    // Tab filter
+    if (activeTab === "items") {
+      if (item.סוג_פריט !== "פריט") return false;
+    } else if (activeTab === "work") {
+      if (item.סוג_פריט !== "עבודה") return false;
+    } else if (activeTab === "linked") {
+      if (item.סוג_פריט !== "פריט") return false;
+      if (!item.עבודות_מקושרות || !Array.isArray(item.עבודות_מקושרות) || item.עבודות_מקושרות.length === 0) return false;
+    }
+
+    return matchesSearch;
   });
 
   const itemsCount = items.filter(i => i.סוג_פריט === "פריט").length;
   const workCount = items.filter(i => i.סוג_פריט === "עבודה").length;
+  const linkedCount = items.filter(i => i.סוג_פריט === "פריט" && i.עבודות_מקושרות && Array.isArray(i.עבודות_מקושרות) && i.עבודות_מקושרות.length > 0).length;
 
 
   return (
