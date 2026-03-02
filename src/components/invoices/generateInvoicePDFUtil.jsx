@@ -2,7 +2,7 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 
-export async function generateInvoicePDF({ invoice, customers, technicians, invoiceLines, allInvoices, onInvoiceNumberGenerated }) {
+export async function generateInvoicePDF({ invoice, customers, technicians, invoiceLines, allInvoices, onInvoiceNumberGenerated, items }) {
   if (!invoice) return;
 
   // אם אין מספר חשבונית - מייצרים אחד לפני הדפסה
