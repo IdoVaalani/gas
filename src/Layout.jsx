@@ -55,6 +55,11 @@ const navigationItems = [
     icon: Package,
   },
   {
+    title: "עבודות",
+    url: createPageUrl("Works"),
+    icon: Wrench,
+  },
+  {
     title: "הצעות מחיר",
     url: createPageUrl("Quotes"),
     icon: FileText,
