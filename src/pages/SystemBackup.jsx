@@ -92,6 +92,10 @@ export default function SystemBackup() {
     'תשלום_חשבונית': 'תשלומים', 'מסמך_חשבונית': 'מסמכים'
   };
 
+  const BATCH_SIZE = 10; // כמות רשומות בכל קריאה לשרת
+
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
   const handleRestore = async () => {
     if (!backupFile) {
       alert('נא לבחור קובץ גיבוי');
@@ -101,43 +105,58 @@ export default function SystemBackup() {
     setIsRestoring(true);
     setRestoreResult(null);
     setRestoreProgress(null);
-    
+
     try {
       const fileContent = await backupFile.text();
       const backupData = JSON.parse(fileContent);
-      
-      const allEntities = restoreOrder;
-      const totalSteps = allEntities.length;
-      let currentStep = 0;
+      const allData = backupData.data || {};
 
-      // שחזור בלבד (update/create) - ללא מחיקה
-      let step2 = allEntities.length;
-      for (const entityName of allEntities) {
-        step2++;
-        setRestoreProgress({
-          stage: 'משחזר נתונים',
-          entityLabel: entityLabels[entityName] || entityName,
-          step: step2,
-          total: totalSteps,
-          percent: Math.round((step2 / totalSteps) * 100)
-        });
-        await base44.functions.invoke('restoreSystem', { backupData, phase: 'restore', entityName });
+      // חישוב סה"כ רשומות
+      const totalRecords = restoreOrder.reduce((sum, e) => sum + (allData[e]?.length || 0), 0);
+      let doneRecords = 0;
+
+      for (const entityName of restoreOrder) {
+        const records = allData[entityName] || [];
+        if (records.length === 0) continue;
+
+        // פיצול ל-batches קטנים
+        for (let i = 0; i < records.length; i += BATCH_SIZE) {
+          const batch = records.slice(i, i + BATCH_SIZE);
+
+          setRestoreProgress({
+            stage: 'משחזר נתונים',
+            entityLabel: `${entityLabels[entityName] || entityName} (${i + 1}-${Math.min(i + BATCH_SIZE, records.length)} מתוך ${records.length})`,
+            step: doneRecords,
+            total: totalRecords,
+            percent: Math.round((doneRecords / totalRecords) * 100)
+          });
+
+          // שליחה לשרת - רק batch קטן, לא כל הקובץ
+          await base44.functions.invoke('restoreSystem', {
+            phase: 'restore',
+            entityName,
+            records: batch
+          });
+
+          doneRecords += batch.length;
+          await sleep(100);
+        }
       }
 
-      setRestoreProgress({ stage: 'הושלם!', entityLabel: '', step: totalSteps, total: totalSteps, percent: 100 });
-      
+      setRestoreProgress({ stage: 'הושלם!', entityLabel: '', step: totalRecords, total: totalRecords, percent: 100 });
+
       setRestoreResult({
         success: true,
         message: 'השחזור הושלם בהצלחה!'
       });
-      
+
       setShowRestoreDialog(false);
       setBackupFile(null);
-      
+
       setTimeout(() => {
         window.location.reload();
       }, 2000);
-      
+
     } catch (error) {
       console.error('Restore error:', error);
       setRestoreResult({
