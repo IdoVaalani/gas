@@ -230,7 +230,6 @@ const SidebarTrigger = React.forwardRef(({ className, onClick, ...props }, ref) 
         onClick?.(event)
         toggleSidebar()
       }}
-      asChild={asChild}
       {...props}>
       {asChild ? (
         <PanelLeft />
