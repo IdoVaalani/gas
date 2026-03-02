@@ -635,6 +635,7 @@ export default function InvoicesPage() {
       technicians,
       invoiceLines,
       allInvoices: invoices,
+      items,
       onInvoiceNumberGenerated: () => queryClient.invalidateQueries({ queryKey: ['חשבונית'] })
     });
   };
