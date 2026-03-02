@@ -232,7 +232,7 @@ export async function generateInvoicePDF({ invoice, customers, technicians, invo
               <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${creditCatalog}</td>
               <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.תיאור}</td>
               <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 11px;">${line.כמות || 1}</td>
-            </tr>`).join('')}
+            </tr>`;}).join('')}
           </tbody>
         </table>
         ` : ''}
