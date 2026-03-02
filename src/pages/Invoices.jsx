@@ -13,8 +13,7 @@ import { Plus, Edit, Trash2, Receipt, Search, Printer, Eye, ArrowUpDown, ArrowUp
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
+import { generateInvoicePDF as generatePDF } from "@/components/invoices/generateInvoicePDFUtil";
 
 export default function InvoicesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
