@@ -5,7 +5,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const items = await base44.asServiceRole.entities.פריט.list();
+    const items = await base44.asServiceRole.entities['\u05e4\u05e8\u05d9\u05d8'].list();
     let updated = 0;
 
     for (const item of items) {
