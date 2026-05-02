@@ -30,10 +30,38 @@ const ENTITY_LABELS = {
   'הצעת_מחיר': 'הצעות מחיר',
   'שורת_הצעה': 'שורות הצעה',
   'חשבונית': 'חשבוניות',
-  'שורת_חשבונית': 'שורות חשבונית',
+  'שורת_חשבונית': 'שורות חשבונית (פריטים ועבודות)',
   'תשלום_חשבונית': 'תשלומים',
-  'מסמך_חשבונית': 'מסמכים'
+  'מסמך_חשבונית': 'מסמכים מצורפים'
 };
+
+// קבוצות ישויות קשורות - כשבוחרים קבוצה נבחרות כולן יחד
+const ENTITY_GROUPS = [
+  {
+    label: 'חשבוניות + כל הפרטים שלהן',
+    color: 'blue',
+    entities: ['חשבונית', 'שורת_חשבונית', 'תשלום_חשבונית', 'מסמך_חשבונית'],
+    note: 'כולל שורות פריטים/עבודות, תשלומים ומסמכים'
+  },
+  {
+    label: 'הצעות מחיר + שורותיהן',
+    color: 'green',
+    entities: ['הצעת_מחיר', 'שורת_הצעה'],
+    note: null
+  },
+  {
+    label: 'לקוחות ואתרים',
+    color: 'purple',
+    entities: ['לקוח', 'אתר'],
+    note: null
+  },
+  {
+    label: 'פריטים, טכנאים והזמנות',
+    color: 'orange',
+    entities: ['פריט', 'טכנאי', 'הזמנת_עבודה'],
+    note: null
+  }
+];
 
 const BATCH_SIZE = 10;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -271,8 +299,8 @@ export default function SystemBackup() {
 
                 {/* בחירת ישויות לשחזור */}
                 {parsedBackup && (
-                  <div className="border rounded-lg p-4 bg-gray-50">
-                    <div className="flex justify-between items-center mb-3">
+                  <div className="border rounded-lg p-4 bg-gray-50 space-y-3">
+                    <div className="flex justify-between items-center">
                       <span className="font-semibold text-sm">בחר מה לשחזר:</span>
                       <div className="flex gap-2">
                         <button onClick={selectAll} className="text-xs text-blue-600 hover:underline">בחר הכל</button>
@@ -280,30 +308,64 @@ export default function SystemBackup() {
                         <button onClick={deselectAll} className="text-xs text-red-600 hover:underline">נקה הכל</button>
                       </div>
                     </div>
+
+                    {/* כפתורי בחירה מהירה לפי קבוצות */}
                     <div className="space-y-2">
-                      {ENTITY_ORDER.map(entityName => {
-                        const count = parsedBackup.data?.[entityName]?.length || 0;
+                      {ENTITY_GROUPS.map((group) => {
+                        const groupTotal = group.entities.reduce((s, e) => s + (parsedBackup.data?.[e]?.length || 0), 0);
+                        const allSelected = group.entities.every(e => !!selectedEntities[e]);
                         return (
-                          <div key={entityName} className="flex items-center gap-3">
-                            <Checkbox
-                              id={`entity-${entityName}`}
-                              checked={!!selectedEntities[entityName]}
-                              onCheckedChange={() => toggleEntity(entityName)}
-                              disabled={count === 0}
-                            />
-                            <Label
-                              htmlFor={`entity-${entityName}`}
-                              className={`flex-1 flex justify-between cursor-pointer ${count === 0 ? 'text-gray-400' : ''}`}
-                            >
-                              <span>{ENTITY_LABELS[entityName]}</span>
-                              <span className="text-xs text-gray-500 font-mono">{count} רשומות</span>
-                            </Label>
+                          <div key={group.label} className="border rounded-lg p-3 bg-white">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <span className="font-medium text-sm">{group.label}</span>
+                                {group.note && <div className="text-xs text-gray-500">{group.note}</div>}
+                              </div>
+                              <Button
+                                size="sm"
+                                variant={allSelected ? "default" : "outline"}
+                                className={`text-xs h-7 ${allSelected ? 'bg-blue-600' : ''}`}
+                                onClick={() => {
+                                  const newVal = !allSelected;
+                                  setSelectedEntities(prev => {
+                                    const updated = { ...prev };
+                                    group.entities.forEach(e => { updated[e] = newVal; });
+                                    return updated;
+                                  });
+                                }}
+                              >
+                                {allSelected ? '✓ נבחר' : 'בחר קבוצה'}
+                              </Button>
+                            </div>
+                            <div className="space-y-1 mr-2">
+                              {group.entities.map(entityName => {
+                                const count = parsedBackup.data?.[entityName]?.length || 0;
+                                return (
+                                  <div key={entityName} className="flex items-center gap-2">
+                                    <Checkbox
+                                      id={`entity-${entityName}`}
+                                      checked={!!selectedEntities[entityName]}
+                                      onCheckedChange={() => toggleEntity(entityName)}
+                                      disabled={count === 0}
+                                    />
+                                    <Label
+                                      htmlFor={`entity-${entityName}`}
+                                      className={`flex-1 flex justify-between cursor-pointer text-sm ${count === 0 ? 'text-gray-400' : ''}`}
+                                    >
+                                      <span>{ENTITY_LABELS[entityName]}</span>
+                                      <span className={`text-xs font-mono ${count > 0 ? 'text-blue-600 font-semibold' : 'text-gray-400'}`}>{count} רשומות</span>
+                                    </Label>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         );
                       })}
                     </div>
-                    <div className="mt-3 text-xs text-gray-500 text-center">
-                      {selectedCount} ישויות נבחרו
+
+                    <div className="mt-2 text-xs text-gray-500 text-center">
+                      {selectedCount} ישויות נבחרו | {ENTITY_ORDER.filter(e => selectedEntities[e]).reduce((s, e) => s + (parsedBackup.data?.[e]?.length || 0), 0)} רשומות בסה"כ
                     </div>
                   </div>
                 )}
