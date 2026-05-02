@@ -987,7 +987,12 @@ export default function InvoicesPage() {
                             .slice(0, 50)
                             .map((customer) => (
                               <SelectItem key={customer.id} value={customer.id}>
-                                {customer.שם_לקוח}
+                                <div>
+                                  <div>{customer.שם_לקוח}</div>
+                                  {customer.כתובת && (
+                                    <div className="text-xs text-gray-400">{customer.כתובת}</div>
+                                  )}
+                                </div>
                               </SelectItem>
                             ))}
                           {customers.filter(c => {
