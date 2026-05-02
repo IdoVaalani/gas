@@ -1,17 +1,40 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+async function fetchAllRecords(base44, entityName) {
+  let allRecords = [];
+  let skip = 0;
+  const PAGE_SIZE = 200;
+
+  while (true) {
+    try {
+      const page = await base44.asServiceRole.entities[entityName].list('created_date', PAGE_SIZE, skip);
+      if (!page || page.length === 0) break;
+      allRecords = [...allRecords, ...page];
+      if (page.length < PAGE_SIZE) break;
+      skip += PAGE_SIZE;
+      await sleep(100);
+    } catch (e) {
+      console.error(`Error fetching page for ${entityName} at skip=${skip}:`, e.message);
+      break;
+    }
+  }
+
+  return allRecords;
+}
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    
+
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Starting system backup...');
+    console.log('Starting full system backup...');
 
-    // רשימת כל ה-entities לגיבוי
     const entitiesToBackup = [
       'לקוח',
       'אתר',
@@ -29,23 +52,26 @@ Deno.serve(async (req) => {
     const backupData = {
       metadata: {
         timestamp: new Date().toISOString(),
-        version: '1.0',
+        version: '2.0',
         createdBy: user.email,
-        totalRecords: 0
+        totalRecords: 0,
+        entityCounts: {}
       },
       data: {}
     };
 
-    // גיבוי כל entity
     for (const entityName of entitiesToBackup) {
       try {
-        const records = await base44.asServiceRole.entities[entityName].list();
+        console.log(`Fetching all records from ${entityName}...`);
+        const records = await fetchAllRecords(base44, entityName);
         backupData.data[entityName] = records;
         backupData.metadata.totalRecords += records.length;
+        backupData.metadata.entityCounts[entityName] = records.length;
         console.log(`Backed up ${records.length} records from ${entityName}`);
       } catch (error) {
         console.error(`Error backing up ${entityName}:`, error);
         backupData.data[entityName] = [];
+        backupData.metadata.entityCounts[entityName] = 0;
       }
     }
 
@@ -53,9 +79,7 @@ Deno.serve(async (req) => {
 
     return Response.json(backupData, {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
 
   } catch (error) {

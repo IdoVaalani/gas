@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -27,27 +27,32 @@ Deno.serve(async (req) => {
     for (const record of records) {
       const { id, created_date, updated_date, created_by, ...recordData } = record;
 
+      if (!id) {
+        errors.push(`record missing id, skipping`);
+        continue;
+      }
+
       let success = false;
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          // Try update first
+          // Try update first (record already exists)
           await base44.asServiceRole.entities[entityName].update(id, recordData);
           restoredCount++;
           success = true;
           break;
         } catch (e) {
-          if (e.message && (e.message.includes('not found') || e.message.includes('404'))) {
-            // Record doesn't exist → create (without id, let the system generate it)
+          if (e.message && (e.message.includes('not found') || e.message.includes('404') || e.message.includes('does not exist'))) {
+            // Record doesn't exist → create WITH original id to preserve relationships
             try {
-              const created = await base44.asServiceRole.entities[entityName].create(recordData);
+              await base44.asServiceRole.entities[entityName].create({ id, ...recordData });
               restoredCount++;
               success = true;
             } catch (e2) {
-              errors.push(`${id}: ${e2.message}`);
+              errors.push(`${id}: create failed: ${e2.message}`);
             }
             break;
           } else if (e.message && e.message.includes('Rate limit')) {
-            await sleep(700);
+            await sleep(800);
           } else {
             errors.push(`${id}: ${e.message}`);
             break;
