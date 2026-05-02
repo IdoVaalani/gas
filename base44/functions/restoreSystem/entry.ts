@@ -25,43 +25,48 @@ Deno.serve(async (req) => {
     const errors = [];
 
     for (const record of records) {
-      const { id, created_date, updated_date, created_by, ...recordData } = record;
+      const { created_date, updated_date, created_by_id, ...recordData } = record;
 
-      if (!id) {
+      if (!recordData.id) {
         errors.push(`record missing id, skipping`);
         continue;
       }
 
       let success = false;
+
+      // Step 1: try update (record already exists)
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          // Try update first (record already exists)
-          await base44.asServiceRole.entities[entityName].update(id, recordData);
+          const { id, ...updateData } = recordData;
+          await base44.asServiceRole.entities[entityName].update(id, updateData);
           restoredCount++;
           success = true;
           break;
         } catch (e) {
-          if (e.message && (e.message.includes('not found') || e.message.includes('404') || e.message.includes('does not exist'))) {
-            // Record doesn't exist → create WITH original id to preserve relationships
+          const msg = e.message || '';
+          if (msg.includes('not found') || msg.includes('404') || msg.includes('does not exist') || msg.includes('No record')) {
+            // Record doesn't exist → create it with original id
             try {
-              await base44.asServiceRole.entities[entityName].create({ id, ...recordData });
+              await base44.asServiceRole.entities[entityName].create(recordData);
               restoredCount++;
               success = true;
             } catch (e2) {
-              errors.push(`${id}: create failed: ${e2.message}`);
+              errors.push(`${recordData.id}: create failed: ${e2.message}`);
             }
             break;
-          } else if (e.message && e.message.includes('Rate limit')) {
-            await sleep(800);
+          } else if (msg.includes('Rate limit') || msg.includes('429')) {
+            await sleep(1000);
           } else {
-            errors.push(`${id}: ${e.message}`);
+            errors.push(`${recordData.id}: update failed: ${msg}`);
             break;
           }
         }
       }
 
-      await sleep(30);
+      await sleep(20);
     }
+
+    console.log(`Restored ${restoredCount}/${records.length} records for ${entityName}. Errors: ${errors.length}`);
 
     return Response.json({ success: true, restored: restoredCount, errors });
 
