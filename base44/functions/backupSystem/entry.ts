@@ -1,29 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-async function fetchAllRecords(base44, entityName) {
-  let allRecords = [];
-  let skip = 0;
-  const PAGE_SIZE = 200;
-
-  while (true) {
-    try {
-      const page = await base44.asServiceRole.entities[entityName].list('created_date', PAGE_SIZE, skip);
-      if (!page || page.length === 0) break;
-      allRecords = [...allRecords, ...page];
-      if (page.length < PAGE_SIZE) break;
-      skip += PAGE_SIZE;
-      await sleep(100);
-    } catch (e) {
-      console.error(`Error fetching page for ${entityName} at skip=${skip}:`, e.message);
-      break;
-    }
-  }
-
-  return allRecords;
-}
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -63,13 +39,14 @@ Deno.serve(async (req) => {
     for (const entityName of entitiesToBackup) {
       try {
         console.log(`Fetching all records from ${entityName}...`);
-        const records = await fetchAllRecords(base44, entityName);
-        backupData.data[entityName] = records;
-        backupData.metadata.totalRecords += records.length;
-        backupData.metadata.entityCounts[entityName] = records.length;
-        console.log(`Backed up ${records.length} records from ${entityName}`);
+        // Use a very large limit to get ALL records in one call
+        const records = await base44.asServiceRole.entities[entityName].list('-created_date', 9999);
+        backupData.data[entityName] = records || [];
+        backupData.metadata.totalRecords += (records || []).length;
+        backupData.metadata.entityCounts[entityName] = (records || []).length;
+        console.log(`Backed up ${(records || []).length} records from ${entityName}`);
       } catch (error) {
-        console.error(`Error backing up ${entityName}:`, error);
+        console.error(`Error backing up ${entityName}:`, error.message);
         backupData.data[entityName] = [];
         backupData.metadata.entityCounts[entityName] = 0;
       }
