@@ -1,0 +1,32 @@
+{
+  "name": "\u05de\u05e1\u05de\u05da_\u05d7\u05e9\u05d1\u05d5\u05e0\u05d9\u05ea",
+  "type": "object",
+  "properties": {
+    "\u05d7\u05e9\u05d1\u05d5\u05e0\u05d9\u05ea_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05d7\u05e9\u05d1\u05d5\u05e0\u05d9\u05ea"
+    },
+    "file_uri": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05e7\u05d5\u05d1\u05e5 \u05d1\u05d0\u05d7\u05e1\u05d5\u05df \u05d4\u05e4\u05e8\u05d8\u05d9"
+    },
+    "fileName": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05d4\u05e7\u05d5\u05d1\u05e5 \u05d4\u05de\u05e7\u05d5\u05e8\u05d9"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u05ea\u05d9\u05d0\u05d5\u05e8 \u05d4\u05de\u05e1\u05de\u05da"
+    },
+    "\u05ea\u05d0\u05e8\u05d9\u05da_\u05de\u05e1\u05de\u05da": {
+      "type": "string",
+      "format": "date",
+      "description": "\u05ea\u05d0\u05e8\u05d9\u05da \u05d4\u05de\u05e1\u05de\u05da"
+    }
+  },
+  "required": [
+    "\u05d7\u05e9\u05d1\u05d5\u05e0\u05d9\u05ea_id",
+    "file_uri",
+    "fileName"
+  ]
+}

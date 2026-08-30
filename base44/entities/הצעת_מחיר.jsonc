@@ -1,0 +1,58 @@
+{
+  "name": "\u05d4\u05e6\u05e2\u05ea_\u05de\u05d7\u05d9\u05e8",
+  "type": "object",
+  "properties": {
+    "\u05de\u05e1\u05e4\u05e8_\u05d4\u05e6\u05e2\u05d4": {
+      "type": "string",
+      "description": "\u05de\u05e1\u05e4\u05e8 \u05d4\u05e6\u05e2\u05d4 \u05d0\u05d5\u05d8\u05d5\u05de\u05d8\u05d9"
+    },
+    "\u05dc\u05e7\u05d5\u05d7_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05dc\u05e7\u05d5\u05d7"
+    },
+    "\u05ea\u05d0\u05e8\u05d9\u05da_\u05d4\u05e6\u05e2\u05d4": {
+      "type": "string",
+      "format": "date",
+      "description": "\u05ea\u05d0\u05e8\u05d9\u05da \u05d9\u05e6\u05d9\u05e8\u05ea \u05d4\u05d4\u05e6\u05e2\u05d4"
+    },
+    "\u05ea\u05d5\u05e7\u05e3_\u05e2\u05d3": {
+      "type": "string",
+      "format": "date",
+      "description": "\u05ea\u05d0\u05e8\u05d9\u05da \u05ea\u05d5\u05e7\u05e3 \u05d4\u05d4\u05e6\u05e2\u05d4"
+    },
+    "\u05e1\u05db\u05d5\u05dd_\u05dc\u05e4\u05e0\u05d9_\u05de\u05e2\u05dd": {
+      "type": "number",
+      "default": 0,
+      "description": "\u05e1\u05db\u05d5\u05dd \u05dc\u05e4\u05e0\u05d9 \u05de\u05e2\"\u05dd"
+    },
+    "\u05de\u05e2\u05dd": {
+      "type": "number",
+      "default": 0,
+      "description": "\u05e1\u05db\u05d5\u05dd \u05de\u05e2\"\u05dd (18%)"
+    },
+    "\u05e1\u05db\u05d5\u05dd_\u05db\u05d5\u05dc\u05dc": {
+      "type": "number",
+      "default": 0,
+      "description": "\u05e1\u05db\u05d5\u05dd \u05db\u05d5\u05dc\u05dc \u05e2\u05dd \u05de\u05e2\"\u05dd"
+    },
+    "\u05e1\u05d8\u05d8\u05d5\u05e1": {
+      "type": "string",
+      "enum": [
+        "\u05d8\u05d9\u05d5\u05d8\u05d4",
+        "\u05e0\u05e9\u05dc\u05d7\u05d4",
+        "\u05de\u05d0\u05d5\u05e9\u05e8\u05ea",
+        "\u05d1\u05d5\u05d8\u05dc\u05d4"
+      ],
+      "default": "\u05d8\u05d9\u05d5\u05d8\u05d4",
+      "description": "\u05e1\u05d8\u05d8\u05d5\u05e1 \u05d4\u05d4\u05e6\u05e2\u05d4"
+    },
+    "\u05d4\u05e2\u05e8\u05d5\u05ea": {
+      "type": "string",
+      "description": "\u05d4\u05e2\u05e8\u05d5\u05ea \u05e0\u05d5\u05e1\u05e4\u05d5\u05ea"
+    }
+  },
+  "required": [
+    "\u05dc\u05e7\u05d5\u05d7_id",
+    "\u05ea\u05d0\u05e8\u05d9\u05da_\u05d4\u05e6\u05e2\u05d4"
+  ]
+}
